@@ -39,7 +39,10 @@ export const runPipeline = (repo_url: string, deploymentId: string): Effect.Effe
         broadcast(deploymentId, 'App is running!')
 
         yield* Effect.sync(() => {
-            Bun.spawn(['bun', 'run', 'index.ts'], { cwd: `./workspace/${deploymentId}` })
+            const startFile = Bun.file(`./workspace/${deploymentId}/index.js`).size > 0
+                ? 'index.js'
+                : 'index.ts'
+            Bun.spawn(['bun', 'run', startFile], { cwd: `./workspace/${deploymentId}` })
         })
 
     }).pipe(

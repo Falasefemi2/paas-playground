@@ -6,10 +6,19 @@ import { cors } from 'hono/cors'
 
 const app = new Hono()
 
+
 app.use('*', cors({
     origin: 'http://localhost:5173',
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowHeaders: ['Content-Type', 'Accept'],
+    exposeHeaders: ['Content-Type'],
 }))
+
+app.use('/deployments/*/logs/stream', (c, next) => {
+    c.header('Access-Control-Allow-Origin', 'http://localhost:5173')
+    c.header('Cache-Control', 'no-cache')
+    return next()
+})
 
 app.get('/', (c) => {
     return c.text('Hello Hono!')
@@ -28,7 +37,8 @@ const program = Effect.gen(function*() {
 Effect.runPromise(program).then(() => {
     Bun.serve({
         fetch: app.fetch,
-        port: 3000
+        port: 3000,
+        idleTimeout: 0
     })
     console.log('Server running on port 3000')
 })

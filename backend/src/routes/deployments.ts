@@ -37,6 +37,7 @@ deployment.get("/", async (c) => {
 })
 
 deployment.get("/:id/logs/stream", (c) => {
+    c.header('Access-Control-Allow-Origin', 'http://localhost:5173')
     const id = c.req.param("id")
     return streamSSE(c, async (stream) => {
         const writer = (log: string) => {

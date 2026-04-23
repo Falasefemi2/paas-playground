@@ -1,3 +1,7 @@
+import { Effect } from "effect"
+import { AppLive, DB } from "./db"
+import { logs } from "./db/schema"
+
 export const sseClients = new Map<string, Set<(log: string) => void>>()
 
 export const addClient = (deploymentId: string, writer: (log: string) => void) => {
@@ -13,4 +17,13 @@ export const removeClient = (deploymentId: string, writer: (log: string) => void
 
 export const broadcast = (deploymentId: string, message: string) => {
     sseClients.get(deploymentId)?.forEach(writer => writer(message))
+    Effect.runPromise(
+        Effect.gen(function*() {
+            const db = yield* DB
+            yield* db.insert(logs).values({
+                deployment_id: deploymentId,
+                message
+            })
+        }).pipe(Effect.provide(AppLive))
+    )
 }
