@@ -2,8 +2,14 @@ import { Effect } from 'effect'
 import { Hono } from 'hono'
 import { AppLive, DB } from './db';
 import deployment from './routes/deployments';
+import { cors } from 'hono/cors'
 
 const app = new Hono()
+
+app.use('*', cors({
+    origin: 'http://localhost:5173',
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
+}))
 
 app.get('/', (c) => {
     return c.text('Hello Hono!')
